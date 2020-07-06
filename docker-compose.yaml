@@ -1,0 +1,48 @@
+version: "3.7"
+services:
+
+  front-envoy:
+    build:
+      context: .
+      dockerfile: Dockerfile-frontenvoy
+    volumes:
+      - ./front-envoy.yaml:/etc/front-envoy.yaml
+    networks:
+      - envoymesh
+    expose:
+      - "8000"
+      - "8001"
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+
+  frontend-service:
+    build:
+      context: .
+      dockerfile: Dockerfile-service
+    volumes:
+      - ./service-envoy.yaml:/etc/service-envoy.yaml
+    networks:
+      envoymesh:
+        aliases:
+          - frontendservice
+    expose:
+      - "8000"
+  frontend-app:
+    build:   
+      context: ./app
+      dockerfile: Dockerfile
+    volumes:
+      - ./app/service-envoy.yaml:/etc/service-envoy.yaml      
+    networks:
+      envoymesh:
+        aliases:
+          - frontendapp     
+    expose:
+      - "8000"
+    # ports:
+    #   - "8081:8081"
+    #   - "80:80"
+
+networks:
+  envoymesh: {}
